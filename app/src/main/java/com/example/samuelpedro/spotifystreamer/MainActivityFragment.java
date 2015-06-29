@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
@@ -21,8 +22,8 @@ import kaaes.spotify.webapi.android.models.ArtistsPager;
  */
 public class MainActivityFragment extends Fragment {
 
-    public BandsAdapter<Band> bandAdapter;
-    public List<Band> listBand;
+    public BandsAdapter bandAdapter;
+    public List listBand;
 
     public MainActivityFragment() {
     }
@@ -32,15 +33,29 @@ public class MainActivityFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         //Begin Task
-        FetchArtistTask artistTask = new FetchArtistTask();
-        artistTask.execute("Muse");
+        //FetchArtistTask artistTask = new FetchArtistTask();
+        //artistTask.execute("Muse");
+        try {
 
-        bandAdapter = new BandsAdapter<Band>(getActivity(), listBand);
+            View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-        ListView listView = (ListView) getView().findViewById(R.id.fragment_main_listView_id);
-        listView.setAdapter(bandAdapter);
+            listBand = new ArrayList<Band>();
+            listBand.add(new Band(1, "nome1"));
+            listBand.add(new Band(2, "nome2"));
+            listBand.add(new Band(3, "nome3"));
+            listBand.add(new Band(4, "nome4"));
 
-        return inflater.inflate(R.layout.fragment_main, container, false);
+            bandAdapter = new BandsAdapter(getActivity(), listBand);
+//
+            ListView listView = (ListView) getView().findViewById(R.id.fragment_main_listView_id);
+            listView.setAdapter(bandAdapter);
+
+            return rootView;
+
+        } catch (Exception e) {
+            Log.e("asdasd", "Porquê? " + e.getMessage() + " ******" + e.toString() + " ******" + e.getLocalizedMessage());
+            return null;
+        }
     }
 
     /**
