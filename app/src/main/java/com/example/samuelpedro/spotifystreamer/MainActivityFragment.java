@@ -47,7 +47,7 @@ public class MainActivityFragment extends Fragment {
 
             bandAdapter = new BandsAdapter(getActivity(), listBand);
 //
-            ListView listView = (ListView) getView().findViewById(R.id.fragment_main_listView_id);
+            ListView listView = (ListView) rootView.findViewById(R.id.fragment_main_listView_id);
             listView.setAdapter(bandAdapter);
 
             return rootView;

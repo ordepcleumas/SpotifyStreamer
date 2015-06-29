@@ -4,9 +4,9 @@ package com.example.samuelpedro.spotifystreamer;
  * Created by Samuel on 25-06-2015.
  */
 public class Band {
-    public String name;
-    public int id;
-    public String image;
+    private int id;
+    private String name;
+    private String image;
 
     public Band() {
     }
