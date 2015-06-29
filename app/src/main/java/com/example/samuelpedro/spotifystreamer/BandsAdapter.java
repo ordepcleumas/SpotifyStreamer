@@ -1,6 +1,7 @@
 package com.example.samuelpedro.spotifystreamer;
 
 import android.app.Activity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +16,8 @@ import java.util.List;
 
 public class BandsAdapter extends ArrayAdapter<Band> {
 
+    private final String LOG_TAG = BandsAdapter.class.getSimpleName();
+
     public BandsAdapter(Activity context, List<Band> bandList) {
 
         super(context, 0, bandList);
@@ -22,21 +25,27 @@ public class BandsAdapter extends ArrayAdapter<Band> {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        // Get the data item for this position
-        Band band = getItem(position);
+        try {
+            // Get the data item for this position
+            Band band = getItem(position);
 
-        if (convertView == null) {
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.artist_item, parent, false);
+            if (convertView == null) {
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.artist_item, parent, false);
+            }
+
+            TextView textViewBand = (TextView) convertView.findViewById(R.id.artist_item_textView_id);
+            textViewBand.setText(band.getName());
+
+            //ImageView ivBand = (ImageView) convertView.findViewById(R.id.artist_item_imageView_id);
+            //Picasso.with(getContext()).load(band.getImage()).into(ivBand);
+
+            // Return the completed view to render on screen
+            return convertView;
+
+        } catch (Exception e) {
+            Log.e(LOG_TAG, "Error ", e);
+            return null;
         }
-
-        TextView textViewBand = (TextView) convertView.findViewById(R.id.artist_item_textView_id);
-        textViewBand.setText(band.getName());
-
-        //ImageView ivBand = (ImageView) convertView.findViewById(R.id.artist_item_imageView_id);
-        //Picasso.with(getContext()).load(band.getImage()).into(ivBand);
-
-        // Return the completed view to render on screen
-        return convertView;
     }
     //http://www.survivingwithandroid.com/2012/10/android-listviewarrayadapter-and.html
     //http://www.survivingwithandroid.com/2012/10/android-listview-custom-adapter-and.html

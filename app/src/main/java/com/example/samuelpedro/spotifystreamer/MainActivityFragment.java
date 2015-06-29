@@ -14,6 +14,7 @@ import java.util.List;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
+import kaaes.spotify.webapi.android.models.Artist;
 import kaaes.spotify.webapi.android.models.ArtistsPager;
 
 
@@ -32,18 +33,18 @@ public class MainActivityFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        //Begin Task
-        //FetchArtistTask artistTask = new FetchArtistTask();
-        //artistTask.execute("Muse");
         try {
+            //Begin Task
+            FetchArtistTask artistTask = new FetchArtistTask();
+            artistTask.execute("Muse");
 
             View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
             listBand = new ArrayList<Band>();
-            listBand.add(new Band(1, "nome1"));
-            listBand.add(new Band(2, "nome2"));
-            listBand.add(new Band(3, "nome3"));
-            listBand.add(new Band(4, "nome4"));
+            //listBand.add(new Band(1, "nome1"));
+            //listBand.add(new Band(2, "nome2"));
+            //listBand.add(new Band(3, "nome3"));
+            //listBand.add(new Band(4, "nome4"));
 
             bandAdapter = new BandsAdapter(getActivity(), listBand);
 //
@@ -68,12 +69,15 @@ public class MainActivityFragment extends Fragment {
         @Override
         protected List doInBackground(String... params) {
 
+            if (params.length == 0) return null;
+
             try {
 
                 SpotifyApi api = new SpotifyApi();
                 //api.setAccessToken("myAccessToken");
                 SpotifyService spotify = api.getService();
                 ArtistsPager results = spotify.searchArtists(params[0]);
+
                 return results.artists.items;
 
                 //List<Artist> la = results.artists.items;
@@ -87,9 +91,18 @@ public class MainActivityFragment extends Fragment {
         }
 
         @Override
-        protected void onPostExecute(List bandList) {
-            super.onPostExecute(bandList);
-            listBand = bandList;
+        protected void onPostExecute(List artistList) {
+            super.onPostExecute(artistList);
+            if (!artistList.isEmpty()) {
+                bandAdapter.clear();
+                for (int i = 0; i < artistList.size(); i++) {
+                    Artist a = (Artist) artistList.get(i);//new Artist();
+                    //a = (Artist) artistList.get(i);
+                    bandAdapter.add(new Band(a.id, a.name));
+                }
+            }
+
+            //listBand = bandList;
 
             //bandAdapter = new BandsAdapter<Band>(getActivity(),bandList);
 

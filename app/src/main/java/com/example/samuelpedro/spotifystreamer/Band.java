@@ -4,30 +4,30 @@ package com.example.samuelpedro.spotifystreamer;
  * Created by Samuel on 25-06-2015.
  */
 public class Band {
-    private int id;
+    private String id;
     private String name;
     private String image;
 
     public Band() {
     }
 
-    public Band(int id, String name) {
+    public Band(String id, String name) {
         this.setId(id);
         this.setName(name);
 
     }
 
-    public Band(int id, String name, String image) {
+    public Band(String id, String name, String image) {
         this.setId(id);
         this.setName(name);
         this.setImage(image);
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 

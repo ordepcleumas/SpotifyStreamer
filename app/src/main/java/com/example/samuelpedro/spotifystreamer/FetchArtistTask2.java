@@ -13,9 +13,9 @@ import kaaes.spotify.webapi.android.models.ArtistsPager;
 /**
  * Created by Samuel on 23-06-2015.
  */
-public class FetchArtistTask extends AsyncTask<String, Void, List> {
+public class FetchArtistTask2 extends AsyncTask<String, Void, List> {
 
-    private final String LOG_TAG = FetchArtistTask.class.getSimpleName();
+    private final String LOG_TAG = FetchArtistTask2.class.getSimpleName();
 
     @Override
     protected List doInBackground(String... params) {
