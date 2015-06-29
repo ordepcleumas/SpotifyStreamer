@@ -7,8 +7,8 @@
 
     <ImageView
         android:id="@+id/artist_item_imageView_id"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_width="55dp"
+        android:layout_height="55dp" />
 
     <TextView
         android:id="@+id/artist_item_textView_id"

@@ -6,7 +6,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -36,8 +39,8 @@ public class BandsAdapter extends ArrayAdapter<Band> {
             TextView textViewBand = (TextView) convertView.findViewById(R.id.artist_item_textView_id);
             textViewBand.setText(band.getName());
 
-            //ImageView ivBand = (ImageView) convertView.findViewById(R.id.artist_item_imageView_id);
-            //Picasso.with(getContext()).load(band.getImage()).into(ivBand);
+            ImageView ivBand = (ImageView) convertView.findViewById(R.id.artist_item_imageView_id);
+            Picasso.with(getContext()).load(band.getImage()).into(ivBand);
 
             // Return the completed view to render on screen
             return convertView;

@@ -98,7 +98,11 @@ public class MainActivityFragment extends Fragment {
                 for (int i = 0; i < artistList.size(); i++) {
                     Artist a = (Artist) artistList.get(i);//new Artist();
                     //a = (Artist) artistList.get(i);
-                    bandAdapter.add(new Band(a.id, a.name));
+                    if (a.images.isEmpty()) {
+                        bandAdapter.add(new Band(a.id, a.name, "http://png-4.findicons.com/files/icons/1676/primo/128/music.png"));
+                    } else {
+                        bandAdapter.add(new Band(a.id, a.name, a.images.iterator().next().url));
+                    }
                 }
             }
 
