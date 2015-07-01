@@ -1,5 +1,6 @@
 package com.example.samuelpedro.spotifystreamer;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -9,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
 
@@ -71,6 +73,18 @@ public class MainActivityFragment extends Fragment {
 
             ListView listView = (ListView) rootView.findViewById(R.id.fragment_main_listView_id);
             listView.setAdapter(bandAdapter);
+
+
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    Band band = bandAdapter.getItem(position);
+                    Intent intent = new Intent(getActivity(), BandActivity.class)
+                            .putExtra(Intent.EXTRA_TEXT, band.getId());
+                    startActivity(intent);
+                }
+            });
 
             return rootView;
 
