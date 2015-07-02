@@ -1,5 +1,6 @@
 package com.example.samuelpedro.spotifystreamer;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -13,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,7 +64,6 @@ public class MainActivityFragment extends Fragment {
 
                 @Override
                 public void afterTextChanged(Editable s) {
-
                 }
 
             });
@@ -80,7 +81,7 @@ public class MainActivityFragment extends Fragment {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     Band band = bandAdapter.getItem(position);
-                    Intent intent = new Intent(getActivity(), BandActivity.class)
+                    Intent intent = new Intent(getActivity(), MusicActivity.class)
                             .putExtra(Intent.EXTRA_TEXT, band.getId());
                     startActivity(intent);
                 }
@@ -129,7 +130,17 @@ public class MainActivityFragment extends Fragment {
         protected void onPostExecute(List artistList) {
             super.onPostExecute(artistList);
 
-            if (!artistList.isEmpty()) {
+            bandAdapter.clear();
+
+            if (artistList.isEmpty()) {
+                Context context = getActivity();
+                CharSequence text = "Sorry, artist not found!";
+                int duration = Toast.LENGTH_SHORT;
+
+                Toast toast = Toast.makeText(context, text, duration);
+                toast.show();
+
+            } else {
                 bandAdapter.clear();
                 for (int i = 0; i < artistList.size(); i++) {
                     Artist a = (Artist) artistList.get(i);//new Artist();
@@ -140,47 +151,8 @@ public class MainActivityFragment extends Fragment {
                         bandAdapter.add(new Band(a.id, a.name, a.images.iterator().next().url));
                     }
                 }
+
             }
-
-            //listBand = bandList;
-
-            //bandAdapter = new BandsAdapter<Band>(getActivity(),bandList);
-
-
-            //bandAdapter = new BandsAdapter(getActivity(), listBand);
-            //for (Object band: bandList){
-            //
-            //}
-
-            //for (int i = 0; i < artistList.size() ; i++) {
-            //    System.out.println(artistList.get(i));
-            //}
-
-            //Iterator<Artist> it = artistsPager.artists.items.iterator();
-
-            //List<Band> listBands = new ArrayList<>();
-//
-            //while (it.hasNext()) {
-            //    Artist art = it.next();
-            //    listBands.add(new Band(art.id, art.name, art.images.listIterator(3).next().url.toString()));
-            //}
-//
-            ////Attaching the Adapter to a ListView
-//
-            //// Construct the data source
-            ////ArrayList<User> arrayOfUsers = new ArrayList<User>();
-//
-            //// Create the adapter to convert the array to views
-            //BandsAdapter adapter;
-            //adapter = new BandsAdapter(, list);
-            //// Attach the adapter to a ListView
-            //ListView listView = (ListView) findViewById(fragment_main_listView_id);
-            //listView.setAdapter(adapter);
-//
-//
-            //adapter.clear();
-            //adapter.addAll(list);
         }
-
     }
 }

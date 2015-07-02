@@ -16,37 +16,22 @@ import java.util.List;
 /**
  * Created by Samuel on 30-06-2015.
  */
-public class TrackAdapter extends ArrayAdapter<Music> {
+public class MusicAdapter extends ArrayAdapter<Music> {
 
-    private final String LOG_TAG = TrackAdapter.class.getSimpleName();
+    private final String LOG_TAG = MusicAdapter.class.getSimpleName();
 
-    /**
-     * Constructor
-     *
-     * @param context  The current context.
-     * @param resource The resource ID for a layout file containing a TextView to use when
-     *                 instantiating views.
-     * @param objects  The objects to represent in the ListView.
-     */
-    public TrackAdapter(Context context, List musicList) {
+    public MusicAdapter(Context context, List<Music> musicList) {
         super(context, 0, musicList);
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @param position
-     * @param convertView
-     * @param parent
-     */
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        super.getView(position, convertView, parent);
+
         try {
             Music m = getItem(position);
 
             if (convertView == null) {
-                convertView = LayoutInflater.from(getContext()).inflate(R.layout.track_item, parent, false);
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.music_item, parent, false);
             }
 
             ImageView imgViewTrack = (ImageView) convertView.findViewById(R.id.track_item_imageView_id);
@@ -56,7 +41,7 @@ public class TrackAdapter extends ArrayAdapter<Music> {
             txtView1.setText(m.getAlbumName());
 
             TextView txtView2 = (TextView) convertView.findViewById(R.id.track_item_textView2_id);
-            txtView1.setText(m.getTrackName());
+            txtView2.setText(m.getTrackName());
 
             return convertView;
         } catch (Exception e) {
