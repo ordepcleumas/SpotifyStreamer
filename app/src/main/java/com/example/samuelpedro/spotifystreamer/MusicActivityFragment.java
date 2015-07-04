@@ -101,24 +101,24 @@ public class MusicActivityFragment extends Fragment {
                     } else {
 
 
-                        String urlLarge = "http://png-4.findicons.com/files/icons/1676/primo/128/music.png";
-                        String urlSmall = "http://png-4.findicons.com/files/icons/1676/primo/128/music.png";
+                        String imgLarge = "http://png-4.findicons.com/files/icons/1676/primo/128/music.png";
+                        String imgSmall = "http://png-4.findicons.com/files/icons/1676/primo/128/music.png";
                         Iterator<Image> iterator = track.album.images.iterator();
                         while (iterator.hasNext()) {
                             Image img = iterator.next();
 
                             if (img.width >= 640) {
-                                urlLarge = img.url;
+                                imgLarge = img.url;
                             }
 
                             if (img.width >= 200) {
-                                urlSmall = img.url;
-                            } else if (urlSmall.isEmpty() && img.width < 200) {
-                                urlSmall = img.url;
+                                imgSmall = img.url;
+                            } else if (imgSmall.isEmpty() && img.width < 200) {
+                                imgSmall = img.url;
                             }
                         }
 
-                        musicAdapter.add(new Music(track.id, track.album.name, track.name, track.album.images.iterator().next().url, track.album.images.iterator().next().url));
+                        musicAdapter.add(new Music(track.id, track.album.name, track.name, imgLarge, imgSmall, track.preview_url));
                     }
                 }
             }
