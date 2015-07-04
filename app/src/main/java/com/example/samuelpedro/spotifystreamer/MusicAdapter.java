@@ -37,11 +37,11 @@ public class MusicAdapter extends ArrayAdapter<Music> {
             ImageView imgViewTrack = (ImageView) convertView.findViewById(R.id.track_item_imageView_id);
             Picasso.with(getContext()).load(m.getPhotoSmall()).into(imgViewTrack);
 
-            TextView txtView1 = (TextView) convertView.findViewById(R.id.track_item_textView1_id);
-            txtView1.setText(m.getAlbumName());
+            TextView txtView1 = (TextView) convertView.findViewById(R.id.music_item_tvMusicTitle_id);
+            txtView1.setText(m.getTrackName());
 
-            TextView txtView2 = (TextView) convertView.findViewById(R.id.track_item_textView2_id);
-            txtView2.setText(m.getTrackName());
+            TextView txtView2 = (TextView) convertView.findViewById(R.id.music_item_tvAlbumTitle_id);
+            txtView2.setText(m.getAlbumName());
 
             return convertView;
         } catch (Exception e) {
