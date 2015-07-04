@@ -169,7 +169,7 @@ public class MainActivityFragment extends Fragment {
                     while (iterator.hasNext()) {
                         Image img = iterator.next();
 
-                        if (img.width <= 200) {
+                        if (img.width >= 200) {
                             imgSmall = img.url;
                         } else if (imgSmall.isEmpty()) {
                             imgSmall = img.url;
