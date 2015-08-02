@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import java.util.ArrayList;
@@ -53,6 +54,18 @@ public class MusicActivityFragment extends Fragment {
 
             ListView listView = (ListView) rootView.findViewById(R.id.list_view_musics);
             listView.setAdapter(musicAdapter);
+
+            //***************************************
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    //Band band = bandAdapter.getItem(position);
+
+                    Intent intent = new Intent(getActivity(), PlayerActivity.class);
+                    startActivity(intent);
+                }
+            });
         }
 
 

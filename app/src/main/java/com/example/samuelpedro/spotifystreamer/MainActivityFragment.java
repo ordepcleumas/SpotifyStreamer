@@ -40,6 +40,12 @@ public class MainActivityFragment extends Fragment {
     public MainActivityFragment() {
     }
 
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -63,29 +69,6 @@ public class MainActivityFragment extends Fragment {
                     return false;
                 }
             });
-            /*
-            editText.addTextChangedListener(new TextWatcher() {
-
-                @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-                }
-
-                @Override
-                public void onTextChanged(CharSequence s, int start, int before, int count) {
-                    if (s.length() != 0) {
-                        //Begin Task
-                        FetchArtistTask artistTask = new FetchArtistTask();
-                        artistTask.execute(s.toString());
-                    }
-                }
-
-                @Override
-                public void afterTextChanged(Editable s) {
-                }
-
-            });
-            */
 
             listBand = new ArrayList<>();
 
@@ -100,6 +83,11 @@ public class MainActivityFragment extends Fragment {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     Band band = bandAdapter.getItem(position);
+
+                    //Intent intent = new Intent(getActivity(), MusicActivity.class)
+                    //        .putParcelableArrayListExtra("bands", (ArrayList<? extends Parcelable>) listBand);
+
+
                     Intent intent = new Intent(getActivity(), MusicActivity.class)
                             .putExtra(Intent.EXTRA_TEXT, band.getId());
                     startActivity(intent);
