@@ -7,7 +7,8 @@ import android.os.Parcelable;
  * Created by Samuel on 01-07-2015.
  */
 public class Music implements Parcelable {
-    public final Parcelable.Creator<Music> CREATOR = new Parcelable.Creator<Music>() {
+
+    public static final Parcelable.Creator<Music> CREATOR = new Parcelable.Creator<Music>() {
         /**
          * Create a new instance of the Parcelable class, instantiating it
          * from the given Parcel whose data had previously been written by
@@ -118,6 +119,18 @@ public class Music implements Parcelable {
 
     public void setPreview_url(String preview_url) {
         this.preview_url = preview_url;
+    }
+
+    @Override
+    public String toString() {
+        return "Music{" +
+                "albumName='" + albumName + '\'' +
+                ", id='" + id + '\'' +
+                ", trackName='" + trackName + '\'' +
+                ", photoSmall='" + photoSmall + '\'' +
+                ", photoLarge='" + photoLarge + '\'' +
+                ", preview_url='" + preview_url + '\'' +
+                '}';
     }
 
     /**

@@ -7,7 +7,7 @@ import android.os.Parcelable;
  * Created by Samuel on 25-06-2015.
  */
 public class Band implements Parcelable {
-    public final Parcelable.Creator<Band> CREATOR = new Parcelable.Creator<Band>() {
+    public static final Parcelable.Creator<Band> CREATOR = new Parcelable.Creator<Band>() {
 
         /**
          * Create a new instance of the Parcelable class, instantiating it
@@ -118,5 +118,4 @@ public class Band implements Parcelable {
         dest.writeString(name);
         dest.writeString(image);
     }
-
 }

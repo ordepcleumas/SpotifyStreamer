@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -19,9 +20,19 @@ import java.util.List;
 public class MusicAdapter extends ArrayAdapter<Music> {
 
     private final String LOG_TAG = MusicAdapter.class.getSimpleName();
+    public ArrayList<Music> listMusic = new ArrayList<>();
 
     public MusicAdapter(Context context, List<Music> musicList) {
         super(context, 0, musicList);
+    }
+
+    public void setMusic(ArrayList<Music> listMusic) {
+        this.listMusic = listMusic;
+
+        Log.d(MusicAdapter.class.getName(), " 13 ");
+        notifyDataSetChanged();
+
+        Log.d(MusicAdapter.class.getName(), " 14 ");
     }
 
     @Override

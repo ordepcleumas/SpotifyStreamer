@@ -34,60 +34,76 @@ import kaaes.spotify.webapi.android.models.Image;
 public class MainActivityFragment extends Fragment {
 
     private final String LOG_TAG = MainActivityFragment.class.getSimpleName();
-    public BandsAdapter bandAdapter;
-    public List listBand;
+    private BandsAdapter bandAdapter;
+    private ArrayList<Band> listBand;
 
     public MainActivityFragment() {
     }
 
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
+
+        Log.d(MainActivityFragment.class.getName(), "Saved Instance State cria...1");
+
         super.onCreate(savedInstanceState);
+
+        listBand = new ArrayList<>();
+        bandAdapter = new BandsAdapter(getActivity(), listBand);
+
+        Log.d(MainActivityFragment.class.getName(), "Saved Instance State cria...2");
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
         try {
-
+            //get view
             View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-            EditText editText = (EditText) rootView.findViewById(R.id.fragment_main_editText_id);
-            editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-                @Override
-                public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                    if (actionId == EditorInfo.IME_ACTION_SEND) {
-                        if (v.getText().length() != 0) {
-                            //Begin Task
-                            FetchArtistTask artistTask = new FetchArtistTask();
-                            artistTask.execute(v.getText().toString());
+            Log.d(MainActivityFragment.class.getName(), "Saved Instance State 2");
+            //if it has no savedInstanceState or do not contain that key
+            if (savedInstanceState == null || !savedInstanceState.containsKey("bands")) {
+
+                Log.d(MainActivityFragment.class.getName(), "Saved Instance State 3");
+                //listBand = new ArrayList<Band>(Arrays.asList(androidFlavors));
+
+                //Search...
+                EditText editText = (EditText) rootView.findViewById(R.id.fragment_main_editText_id);
+                editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+                    @Override
+                    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                        if (actionId == EditorInfo.IME_ACTION_SEND) {
+                            if (v.getText().length() != 0) {
+                                //Begin Task
+                                FetchArtistTask artistTask = new FetchArtistTask();
+                                artistTask.execute(v.getText().toString());
+                            }
+                            return true;
                         }
-                        return true;
+                        return false;
                     }
-                    return false;
-                }
-            });
+                });
+                //else get saved state
+            } else {
 
-            listBand = new ArrayList<>();
+                Log.d(MainActivityFragment.class.getName(), "Saved Instance State 4");
+                listBand = savedInstanceState.getParcelableArrayList("bands");
 
-            bandAdapter = new BandsAdapter(getActivity(), listBand);
-
+                bandAdapter = new BandsAdapter(getActivity(), listBand);
+                bandAdapter.notifyDataSetChanged();
+            }
+            //get listView
             ListView listView = (ListView) rootView.findViewById(R.id.fragment_main_listView_id);
+            //set adapter with list updated
             listView.setAdapter(bandAdapter);
 
-
+            //create
             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     Band band = bandAdapter.getItem(position);
-
-                    //Intent intent = new Intent(getActivity(), MusicActivity.class)
-                    //        .putParcelableArrayListExtra("bands", (ArrayList<? extends Parcelable>) listBand);
-
-
                     Intent intent = new Intent(getActivity(), MusicActivity.class)
                             .putExtra(Intent.EXTRA_TEXT, band.getId());
                     startActivity(intent);
@@ -101,6 +117,14 @@ public class MainActivityFragment extends Fragment {
             return null;
         }
     }
+
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putParcelableArrayList("bands", listBand);
+        super.onSaveInstanceState(outState);
+    }
+
 
     /**
      * Created by Samuel on 23-06-2015.
@@ -169,4 +193,5 @@ public class MainActivityFragment extends Fragment {
             }
         }
     }
+
 }
