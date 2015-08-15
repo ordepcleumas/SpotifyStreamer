@@ -42,9 +42,7 @@ public class MusicActivityFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (savedInstanceState == null) {
 
-        }
         listMusic = new ArrayList<>();
     }
 

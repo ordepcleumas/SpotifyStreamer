@@ -13,24 +13,24 @@
 
     <TextView
         android:id="@+id/tvArtist"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/tvArtist" />
 
     <TextView
         android:id="@+id/tvAlbum"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/tvAlbum" />
 
     <ImageView
         android:id="@+id/ivCover"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
     <TextView
         android:id="@+id/tvMusic"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/tvMusic" />
 
@@ -44,39 +44,47 @@
         android:layout_height="wrap_content">
 
         <TextView
-            android:layout_width="wrap_content"
+            android:id="@+id/tvTimePassed"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="" />
+            android:layout_weight="1"
+            android:gravity="start"
+            android:text="0:00" />
 
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:id="@+id/tvTimeLeft"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="end"
+            android:text="0:30" />
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal">
 
         <Button
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:id="@+id/btPrevious"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
             android:layout_margin="15dp"
-            android:layout_weight="1"
             android:background="@android:drawable/ic_media_previous" />
 
         <Button
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:id="@+id/btPlay"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
             android:layout_margin="15dp"
-            android:layout_weight="1"
             android:background="@android:drawable/ic_media_play" />
 
         <Button
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:id="@+id/btNext"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
             android:layout_margin="15dp"
-            android:layout_weight="1"
-            android:background="@android:drawable/ic_media_previous" />
+            android:background="@android:drawable/ic_media_next" />
     </LinearLayout>
 
 
