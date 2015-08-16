@@ -29,12 +29,20 @@ import kaaes.spotify.webapi.android.models.Tracks;
  */
 public class MusicActivityFragment extends Fragment {
 
-    public static final String POSITION = "position";
+    //For send receive bundle data
+    private static final String BAND_ID = "band_id";
+    private static final String BAND_NAME = "band_name";
+    private static final String POSITION = "position";
     private static final String TOP_10_LIST_SONGS = "TOP_10_LIST_SONGS";
     private static final String STATE_MUSIC = "music";
+    //For Log
+    private final String LOG_TAG = MusicActivityFragment.class.getSimpleName();
     private MusicAdapter musicAdapter;
     private ArrayList<Music> listMusic;
-    private String mIdBand = "";
+    private String mIdBand;
+    private String mNameBand;
+    private Bundle bundleR; //Receive
+    private Bundle bundleS; //Send
 
     public MusicActivityFragment() {
     }
@@ -44,6 +52,7 @@ public class MusicActivityFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         listMusic = new ArrayList<>();
+        musicAdapter = new MusicAdapter(getActivity(), listMusic);
     }
 
     @Override
@@ -51,27 +60,23 @@ public class MusicActivityFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.fragment_music, container, false);
-
-        Intent intent = getActivity().getIntent();
-
-        mIdBand = intent.getStringExtra(Intent.EXTRA_TEXT);
-
-        musicAdapter = new MusicAdapter(getActivity(), listMusic);
-
         ListView listView = (ListView) rootView.findViewById(R.id.list_view_musics);
 
+        bundleR = getActivity().getIntent().getExtras();
 
-        if (savedInstanceState != null) {
+        mIdBand = bundleR.getString(BAND_ID);
+        mNameBand = bundleR.getString(BAND_NAME);
 
-            listMusic = savedInstanceState.getParcelableArrayList(STATE_MUSIC);
+        if (savedInstanceState == null || !savedInstanceState.containsKey(STATE_MUSIC)) {
+            Log.d("qqqqqqqqqqqqq", "aaaaaaaaaaaaaaaaaaaa");
+            FetchSongsTask fetchSongsTask = new FetchSongsTask();
+            fetchSongsTask.execute(mIdBand);
 
         } else {
-            if (intent != null && intent.hasExtra(Intent.EXTRA_TEXT)) {
-
-                FetchSongsTask fetchSongsTask = new FetchSongsTask();
-                fetchSongsTask.execute(mIdBand);
-
-            }
+            listMusic = savedInstanceState.getParcelableArrayList(STATE_MUSIC);
+            //musicAdapter.setMusic(listMusic);
+            musicAdapter = new MusicAdapter(getActivity(), listMusic);
+            listView.setAdapter(musicAdapter);
         }
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -81,12 +86,13 @@ public class MusicActivityFragment extends Fragment {
 
                 Intent intent = new Intent(getActivity(), PlayerActivity.class);
 
-                Bundle bundle = new Bundle();
+                bundleS = new Bundle();
 
-                bundle.putInt(POSITION, position);
-                bundle.putParcelableArrayList(TOP_10_LIST_SONGS, listMusic);
+                bundleS.putInt(POSITION, position);
+                bundleS.putString(BAND_NAME, mNameBand);
+                bundleS.putParcelableArrayList(TOP_10_LIST_SONGS, listMusic);
 
-                intent.putExtras(bundle);
+                intent.putExtras(bundleS);
 
                 startActivity(intent);
             }
@@ -99,8 +105,11 @@ public class MusicActivityFragment extends Fragment {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putParcelableArrayList(STATE_MUSIC, listMusic);
         super.onSaveInstanceState(outState);
+        //necessário????
+        if (!listMusic.isEmpty()) {
+            outState.putParcelableArrayList(STATE_MUSIC, listMusic);
+        }
     }
 
     public class FetchSongsTask extends AsyncTask<String, Void, List> {

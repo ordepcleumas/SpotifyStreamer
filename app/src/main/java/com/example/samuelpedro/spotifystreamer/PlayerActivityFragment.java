@@ -21,8 +21,9 @@ import java.util.ArrayList;
  */
 public class PlayerActivityFragment extends Fragment {
 
-    private static final String TOP_10_LIST_SONGS = "TOP_10_LIST_SONGS";
     private static final String POSITION = "position";
+    private static final String BAND_NAME = "band_name";
+    private static final String TOP_10_LIST_SONGS = "TOP_10_LIST_SONGS";
 
     TextView tvArtist;
     TextView tvAlbum;
@@ -36,6 +37,7 @@ public class PlayerActivityFragment extends Fragment {
     Button next;
     private ArrayList<Music> listMusic;
     private int position;
+    private String mBandName;
     private MediaPlayer mediaPlayer;
 
     public PlayerActivityFragment() {
@@ -47,8 +49,9 @@ public class PlayerActivityFragment extends Fragment {
 
         Bundle bundle = getActivity().getIntent().getExtras();
 
-        listMusic = bundle.getParcelableArrayList(TOP_10_LIST_SONGS);
         position = bundle.getInt(POSITION);
+        mBandName = bundle.getString(BAND_NAME);
+        listMusic = bundle.getParcelableArrayList(TOP_10_LIST_SONGS);
     }
 
     @Override
@@ -67,9 +70,8 @@ public class PlayerActivityFragment extends Fragment {
                 : listMusic.get(position).getPhotoLarge());
 
 
-        //tvArtist.setText(listMusic.get(position).getPhotoLarge());
+        tvArtist.setText(mBandName);
         tvAlbum.setText(listMusic.get(position).getAlbumName());
-        //ivCover.set(listMusic.get(position).getAlbumName());
         Picasso.with(getActivity()).load(img).into(ivCover);
         tvMusic.setText(listMusic.get(position).getTrackName());
 
@@ -150,7 +152,7 @@ public class PlayerActivityFragment extends Fragment {
     public void getMusic() {
         mediaPlayer = MediaPlayer.create(getActivity(), Uri.parse(listMusic.get(position).getPreview_url()));
 
-        tvArtist.setText(listMusic.get(position).getAlbumName());
+        tvArtist.setText(mBandName);
         tvAlbum.setText(listMusic.get(position).getAlbumName());
         Picasso.with(getActivity()).load(listMusic.get(position).getPhotoLarge()).into(ivCover);
         tvMusic.setText(listMusic.get(position).getTrackName());

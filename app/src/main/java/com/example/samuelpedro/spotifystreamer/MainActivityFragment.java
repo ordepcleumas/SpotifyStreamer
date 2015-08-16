@@ -33,6 +33,10 @@ import kaaes.spotify.webapi.android.models.Image;
  */
 public class MainActivityFragment extends Fragment {
 
+    //For bundle
+    private static final String BAND_NAME = "band_name";
+    private static final String BAND_ID = "band_id";
+    //For Log
     private final String LOG_TAG = MainActivityFragment.class.getSimpleName();
     private BandsAdapter bandAdapter;
     private ArrayList<Band> listBand;
@@ -43,14 +47,9 @@ public class MainActivityFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
 
-        Log.d(MainActivityFragment.class.getName(), "Saved Instance State cria...1");
-
         super.onCreate(savedInstanceState);
-
         listBand = new ArrayList<>();
         bandAdapter = new BandsAdapter(getActivity(), listBand);
-
-        Log.d(MainActivityFragment.class.getName(), "Saved Instance State cria...2");
 
     }
 
@@ -61,11 +60,11 @@ public class MainActivityFragment extends Fragment {
             //get view
             View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-            Log.d(MainActivityFragment.class.getName(), "Saved Instance State 2");
+            //Log.d(MainActivityFragment.class.getName(), "Saved Instance State 2");
             //if it has no savedInstanceState or do not contain that key
             if (savedInstanceState == null || !savedInstanceState.containsKey("bands")) {
 
-                Log.d(MainActivityFragment.class.getName(), "Saved Instance State 3");
+                //Log.d(MainActivityFragment.class.getName(), "Saved Instance State 3");
                 //listBand = new ArrayList<Band>(Arrays.asList(androidFlavors));
 
                 //Search...
@@ -104,8 +103,14 @@ public class MainActivityFragment extends Fragment {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     Band band = bandAdapter.getItem(position);
-                    Intent intent = new Intent(getActivity(), MusicActivity.class)
-                            .putExtra(Intent.EXTRA_TEXT, band.getId());
+                    Intent intent = new Intent(getActivity(), MusicActivity.class);
+
+                    Bundle bundle = new Bundle();
+
+                    bundle.putString(BAND_ID, band.getId());
+                    bundle.putString(BAND_NAME, band.getName());
+
+                    intent.putExtras(bundle);
                     startActivity(intent);
                 }
             });
@@ -121,8 +126,11 @@ public class MainActivityFragment extends Fragment {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putParcelableArrayList("bands", listBand);
+        Log.d(LOG_TAG, "onSaveInstanceState_1");
         super.onSaveInstanceState(outState);
+        Log.d(LOG_TAG, "onSaveInstanceState_2");
+        outState.putParcelableArrayList("bands", listBand);
+        Log.d(LOG_TAG, "onSaveInstanceState_3");
     }
 
 
