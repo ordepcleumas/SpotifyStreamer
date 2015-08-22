@@ -4,17 +4,25 @@ import android.content.Intent;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
+import java.sql.Time;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -29,16 +37,38 @@ public class PlayerActivityFragment extends Fragment {
     TextView tvAlbum;
     ImageView ivCover;
     TextView tvMusic;
+    SeekBar mSeekBar;
+    TextView tvTimeLeft;
+    TextView tvTimePassed;
 
     Intent intent;
     String img;
     Button play;
     Button previous;
     Button next;
+    double timeElapsed = 0, finalTime = 0;
     private ArrayList<Music> listMusic;
     private int position;
     private String mBandName;
-    private MediaPlayer mediaPlayer;
+    private MediaPlayer mMediaPlayer;
+    private Handler durationHandler = new Handler();
+    private Runnable updateSeekBarTime = new Runnable() {
+        @Override
+        public void run() {
+
+            //get current position
+            timeElapsed = mMediaPlayer.getCurrentPosition();
+            //set seekbar progress
+            mSeekBar.setProgress((int) timeElapsed);
+            //set time remaing
+            double timeRemaining = finalTime - timeElapsed;
+            tvTimeLeft.setText(String.format("%d:%d", TimeUnit.MILLISECONDS.toMinutes((long) timeRemaining), TimeUnit.MILLISECONDS.toSeconds((long) timeRemaining) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes((long) timeRemaining))));
+            //tvTimePassed.setText(String.format("%d:%d", TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes((long) timeRemaining))));
+            //repeat yourself that again in 100 miliseconds
+            durationHandler.postDelayed(this, 100);
+
+        }
+    };
 
     public PlayerActivityFragment() {
     }
@@ -47,11 +77,13 @@ public class PlayerActivityFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        mMediaPlayer = new MediaPlayer();
         Bundle bundle = getActivity().getIntent().getExtras();
 
         position = bundle.getInt(POSITION);
         mBandName = bundle.getString(BAND_NAME);
         listMusic = bundle.getParcelableArrayList(TOP_10_LIST_SONGS);
+
     }
 
     @Override
@@ -64,10 +96,16 @@ public class PlayerActivityFragment extends Fragment {
         tvAlbum = (TextView) rootView.findViewById(R.id.tvAlbum);
         ivCover = (ImageView) rootView.findViewById(R.id.ivCover);
         tvMusic = (TextView) rootView.findViewById(R.id.tvMusic);
+        mSeekBar = (SeekBar) rootView.findViewById(R.id.sbMusic);
+        tvTimeLeft = (TextView) rootView.findViewById(R.id.tvTimeLeft);
+        tvTimePassed = (TextView) rootView.findViewById(R.id.tvTimePassed);
 
-        img = (listMusic.get(position).getPhotoLarge().isEmpty()
-                ? listMusic.get(position).getPhotoSmall()
-                : listMusic.get(position).getPhotoLarge());
+
+        play = (Button) rootView.findViewById(R.id.btPlay);
+        previous = (Button) rootView.findViewById(R.id.btPrevious);
+        next = (Button) rootView.findViewById(R.id.btNext);
+
+        img = listMusic.get(position).getPhotoLarge();
 
 
         tvArtist.setText(mBandName);
@@ -75,30 +113,60 @@ public class PlayerActivityFragment extends Fragment {
         Picasso.with(getActivity()).load(img).into(ivCover);
         tvMusic.setText(listMusic.get(position).getTrackName());
 
-        mediaPlayer = new MediaPlayer();
-        mediaPlayer = MediaPlayer.create(getActivity(), Uri.parse(listMusic.get(position).getPreview_url()));
+        mMediaPlayer = MediaPlayer.create(getActivity(), Uri.parse(listMusic.get(position).getPreview_url()));
+        //mMediaPlayer.start();
+        startMusic();
 
-        mediaPlayer.start();
 
-        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+        finalTime = mMediaPlayer.getDuration();
+        mSeekBar.setMax((int) finalTime);
+        mSeekBar.setClickable(false);
+
+
+        mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            int musicProgress = 0;
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                Log.d("AA", "AAAAAAAAAAAAAAAAAA");
+                if (mMediaPlayer != null && fromUser) {
+                    Log.d("AA", "BBBBBBBBBBBBB");
+                    //mMediaPlayer.seekTo(progress * 1000);
+                    musicProgress = progress;
+                    getTimeText(musicProgress);
+                }
+                Log.d("AA", "CCCCCCCCCCCCC");
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+                Log.d("AA", "EEEEEEEEEEEEEEE");
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                Log.d("AA", "FFFFFFFFFFFF");
+
+            }
+        });
+
+        mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
 
             }
         });
 
-        play = (Button) rootView.findViewById(R.id.btPlay);
-        previous = (Button) rootView.findViewById(R.id.btPrevious);
-        next = (Button) rootView.findViewById(R.id.btNext);
-
         play.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
-                if (mediaPlayer.isPlaying()) {
+                if (mMediaPlayer.isPlaying()) {
                     pauseMusic();
                 } else {
                     startMusic();
+                    //timeElapsed = media
                 }
             }
         });
@@ -107,12 +175,14 @@ public class PlayerActivityFragment extends Fragment {
 
             @Override
             public void onClick(View v) {
+                if (mMediaPlayer.isPlaying()) mMediaPlayer.stop();
 
-                if (position > 0) {
-                    position = position - 1;
-                } else {
-                    position = listMusic.size() - 1;
-                }
+                position = (position > 0) ? position - 1 : listMusic.size() - 1;
+                //if (position > 0) {
+                //    position = position - 1;
+                //} else {
+                //    position = listMusic.size() - 1;
+                //}
                 getMusic();
             }
         });
@@ -121,13 +191,14 @@ public class PlayerActivityFragment extends Fragment {
             @Override
             public void onClick(View v) {
 
-                if (mediaPlayer.isPlaying()) mediaPlayer.stop();
+                if (mMediaPlayer.isPlaying()) mMediaPlayer.stop();
 
-                if (position < (listMusic.size() - 1)) {
-                    position = position + 1;
-                } else {
-                    position = 0;
-                }
+                position = (position < (listMusic.size() - 1) ? position + 1 : 0);
+                //if (position < (listMusic.size() - 1)) {
+                //    position = position + 1;
+                //} else {
+                //    position = 0;
+                //}
                 getMusic();
             }
         });
@@ -135,22 +206,42 @@ public class PlayerActivityFragment extends Fragment {
         return rootView;
     }
 
+    public String getTimeText(int progress) {
+        DateFormat format = new SimpleDateFormat("mm:ss");
+
+        try {
+            Time time = new Time(format.parse(String.valueOf(progress)).getTime());
+            return time.toString();
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public void pauseMusic() {
-        if (mediaPlayer != null) {
-            mediaPlayer.pause();
+        if (mMediaPlayer != null) {
+            mMediaPlayer.pause();
             play.setBackgroundResource(android.R.drawable.ic_media_play);
         }
     }
 
     public void startMusic() {
-        if (mediaPlayer != null) {
-            mediaPlayer.start();
+        if (mMediaPlayer != null) {
+            mMediaPlayer.start();
             play.setBackgroundResource(android.R.drawable.ic_media_pause);
+
+            //http://examples.javacodegeeks.com/android/android-mediaplayer-example/
+            //SeekBar example
+            timeElapsed = mMediaPlayer.getCurrentPosition();
+            mSeekBar.setProgress((int) timeElapsed);
+
+            durationHandler.postDelayed(updateSeekBarTime, 100);
+
         }
     }
 
     public void getMusic() {
-        mediaPlayer = MediaPlayer.create(getActivity(), Uri.parse(listMusic.get(position).getPreview_url()));
+        mMediaPlayer = MediaPlayer.create(getActivity(), Uri.parse(listMusic.get(position).getPreview_url()));
 
         tvArtist.setText(mBandName);
         tvAlbum.setText(listMusic.get(position).getAlbumName());

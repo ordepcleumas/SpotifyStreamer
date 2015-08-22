@@ -11,6 +11,7 @@ public class MusicActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //getActionBar().setDisplayHomeAsUpEnabled(true);
         setContentView(R.layout.activity_music);
     }
 
