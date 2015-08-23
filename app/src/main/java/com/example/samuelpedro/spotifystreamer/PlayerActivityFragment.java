@@ -6,7 +6,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,10 +16,6 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
-import java.sql.Time;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
@@ -33,25 +28,26 @@ public class PlayerActivityFragment extends Fragment {
     private static final String BAND_NAME = "band_name";
     private static final String TOP_10_LIST_SONGS = "TOP_10_LIST_SONGS";
 
-    TextView tvArtist;
-    TextView tvAlbum;
-    ImageView ivCover;
-    TextView tvMusic;
-    SeekBar mSeekBar;
-    TextView tvTimeLeft;
-    TextView tvTimePassed;
-
     Intent intent;
-    String img;
-    Button play;
-    Button previous;
-    Button next;
-    double timeElapsed = 0, finalTime = 0;
+    MediaPlayer mMediaPlayer;
+    private TextView tvArtist;
+    private TextView tvAlbum;
+    private ImageView ivCover;
+    private TextView tvMusic;
+    private SeekBar mSeekBar;
+    private TextView tvTimeLeft;
+    private TextView tvTimePassed;
+    private Button play;
+    private Button previous;
+    private Button next;
+    //Seekbar
+    private double timeElapsed = 0, finalTime = 0;
+    private Handler durationHandler = new Handler();
+
     private ArrayList<Music> listMusic;
     private int position;
     private String mBandName;
-    private MediaPlayer mMediaPlayer;
-    private Handler durationHandler = new Handler();
+
     private Runnable updateSeekBarTime = new Runnable() {
         @Override
         public void run() {
@@ -71,6 +67,7 @@ public class PlayerActivityFragment extends Fragment {
 
         }
     };
+
 
     public PlayerActivityFragment() {
     }
@@ -105,48 +102,37 @@ public class PlayerActivityFragment extends Fragment {
         previous = (Button) rootView.findViewById(R.id.btPrevious);
         next = (Button) rootView.findViewById(R.id.btNext);
 
-        img = listMusic.get(position).getPhotoLarge();
-
-
+        //fill elements with values
         tvArtist.setText(mBandName);
         tvAlbum.setText(listMusic.get(position).getAlbumName());
-        Picasso.with(getActivity()).load(img).into(ivCover);
+        Picasso.with(getActivity()).load(listMusic.get(position).getPhotoLarge()).into(ivCover);
         tvMusic.setText(listMusic.get(position).getTrackName());
 
+        //Create MediaPlayer
         mMediaPlayer = MediaPlayer.create(getActivity(), Uri.parse(listMusic.get(position).getPreview_url()));
-        //mMediaPlayer.start();
-        startMusic();
-
-
+        //set duration of Music
         finalTime = mMediaPlayer.getDuration();
         mSeekBar.setMax((int) finalTime);
-        //mSeekBar.setClickable(true);
+        //Start Music
+        startMusic();
 
-
+        //Config SeekBarChange
         mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            int musicProgress = 0;
 
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                Log.d("AA", "AAAAAAAAAAAAAAAAAA");
                 if (mMediaPlayer != null && fromUser) {
-                    Log.d("AA", "BBBBBBBBBBBBB" + progress);
                     mMediaPlayer.seekTo(progress);
-                    musicProgress = progress;
-                    getTimeText(musicProgress);
                 }
-                Log.d("AA", "CCCCCCCCCCCCC");
             }
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
 
-                Log.d("AA", "EEEEEEEEEEEEEEE");
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                Log.d("AA", "FFFFFFFFFFFF");
 
             }
         });
@@ -154,6 +140,8 @@ public class PlayerActivityFragment extends Fragment {
         mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
+                //play.setBackgroundResource(android.R.drawable.ic_media_play);
+                //or
 
             }
         });
@@ -166,7 +154,6 @@ public class PlayerActivityFragment extends Fragment {
                     pauseMusic();
                 } else {
                     startMusic();
-                    //timeElapsed = media
                 }
             }
         });
@@ -178,11 +165,6 @@ public class PlayerActivityFragment extends Fragment {
                 if (mMediaPlayer.isPlaying()) mMediaPlayer.stop();
 
                 position = (position > 0) ? position - 1 : listMusic.size() - 1;
-                //if (position > 0) {
-                //    position = position - 1;
-                //} else {
-                //    position = listMusic.size() - 1;
-                //}
                 getMusic();
             }
         });
@@ -192,13 +174,7 @@ public class PlayerActivityFragment extends Fragment {
             public void onClick(View v) {
 
                 if (mMediaPlayer.isPlaying()) mMediaPlayer.stop();
-
                 position = (position < (listMusic.size() - 1) ? position + 1 : 0);
-                //if (position < (listMusic.size() - 1)) {
-                //    position = position + 1;
-                //} else {
-                //    position = 0;
-                //}
                 getMusic();
             }
         });
@@ -206,17 +182,6 @@ public class PlayerActivityFragment extends Fragment {
         return rootView;
     }
 
-    public String getTimeText(int progress) {
-        DateFormat format = new SimpleDateFormat("mm:ss");
-
-        try {
-            Time time = new Time(format.parse(String.valueOf(progress)).getTime());
-            return time.toString();
-        } catch (ParseException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
 
     public void pauseMusic() {
         if (mMediaPlayer != null) {
@@ -243,6 +208,9 @@ public class PlayerActivityFragment extends Fragment {
     @Override
     public void onDestroy() {
         if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
+            //Stop Runnable
+            durationHandler.removeCallbacks(updateSeekBarTime);
+            //Stop Media Player
             mMediaPlayer.stop();
             mMediaPlayer.release();
             mMediaPlayer = null;
@@ -251,13 +219,16 @@ public class PlayerActivityFragment extends Fragment {
     }
 
     public void getMusic() {
+        //Create MediaPlayer with music
         mMediaPlayer = MediaPlayer.create(getActivity(), Uri.parse(listMusic.get(position).getPreview_url()));
-
+        //set Elements
         tvArtist.setText(mBandName);
         tvAlbum.setText(listMusic.get(position).getAlbumName());
         Picasso.with(getActivity()).load(listMusic.get(position).getPhotoLarge()).into(ivCover);
         tvMusic.setText(listMusic.get(position).getTrackName());
+        //start Music
         startMusic();
-
     }
+
+
 }
