@@ -62,8 +62,10 @@ public class PlayerActivityFragment extends Fragment {
             mSeekBar.setProgress((int) timeElapsed);
             //set time remaing
             double timeRemaining = finalTime - timeElapsed;
-            tvTimeLeft.setText(String.format("%d:%d", TimeUnit.MILLISECONDS.toMinutes((long) timeRemaining), TimeUnit.MILLISECONDS.toSeconds((long) timeRemaining) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes((long) timeRemaining))));
-            //tvTimePassed.setText(String.format("%d:%d", TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes((long) timeRemaining))));
+            tvTimePassed.setText(String.format("%02d:%02d", TimeUnit.MILLISECONDS.toMinutes((long) timeElapsed), TimeUnit.MILLISECONDS.toSeconds((long) timeElapsed)));
+            tvTimeLeft.setText(String.format("%02d:%02d",
+                    TimeUnit.MILLISECONDS.toMinutes((long) timeRemaining), TimeUnit.MILLISECONDS.toSeconds((long) timeRemaining)
+                            - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes((long) timeRemaining))));
             //repeat yourself that again in 100 miliseconds
             durationHandler.postDelayed(this, 100);
 
@@ -99,8 +101,6 @@ public class PlayerActivityFragment extends Fragment {
         mSeekBar = (SeekBar) rootView.findViewById(R.id.sbMusic);
         tvTimeLeft = (TextView) rootView.findViewById(R.id.tvTimeLeft);
         tvTimePassed = (TextView) rootView.findViewById(R.id.tvTimePassed);
-
-
         play = (Button) rootView.findViewById(R.id.btPlay);
         previous = (Button) rootView.findViewById(R.id.btPrevious);
         next = (Button) rootView.findViewById(R.id.btNext);
@@ -120,7 +120,7 @@ public class PlayerActivityFragment extends Fragment {
 
         finalTime = mMediaPlayer.getDuration();
         mSeekBar.setMax((int) finalTime);
-        mSeekBar.setClickable(false);
+        //mSeekBar.setClickable(true);
 
 
         mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -130,8 +130,8 @@ public class PlayerActivityFragment extends Fragment {
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 Log.d("AA", "AAAAAAAAAAAAAAAAAA");
                 if (mMediaPlayer != null && fromUser) {
-                    Log.d("AA", "BBBBBBBBBBBBB");
-                    //mMediaPlayer.seekTo(progress * 1000);
+                    Log.d("AA", "BBBBBBBBBBBBB" + progress);
+                    mMediaPlayer.seekTo(progress);
                     musicProgress = progress;
                     getTimeText(musicProgress);
                 }
@@ -240,6 +240,16 @@ public class PlayerActivityFragment extends Fragment {
         }
     }
 
+    @Override
+    public void onDestroy() {
+        if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
+            mMediaPlayer.stop();
+            mMediaPlayer.release();
+            mMediaPlayer = null;
+        }
+        super.onDestroy();
+    }
+
     public void getMusic() {
         mMediaPlayer = MediaPlayer.create(getActivity(), Uri.parse(listMusic.get(position).getPreview_url()));
 
@@ -250,5 +260,4 @@ public class PlayerActivityFragment extends Fragment {
         startMusic();
 
     }
-
 }
