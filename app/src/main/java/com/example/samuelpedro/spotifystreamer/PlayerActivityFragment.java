@@ -1,7 +1,10 @@
 package com.example.samuelpedro.spotifystreamer;
 
+import android.content.Context;
 import android.content.Intent;
 import android.media.MediaPlayer;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -13,6 +16,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -27,6 +31,7 @@ public class PlayerActivityFragment extends DialogFragment {
     private static final String POSITION = "position";
     private static final String BAND_NAME = "band_name";
     private static final String TOP_10_LIST_SONGS = "TOP_10_LIST_SONGS";
+    private static final String TIMEELAPSED = "timeElapsed";
 
     Intent intent;
     MediaPlayer mMediaPlayer;
@@ -80,14 +85,34 @@ public class PlayerActivityFragment extends DialogFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mMediaPlayer = new MediaPlayer();
-        //Bundle bundle = getActivity().getIntent().getExtras();
-        Bundle bundle = getArguments();
+        if (savedInstanceState != null) {
+            listMusic = savedInstanceState.getParcelableArrayList(TOP_10_LIST_SONGS);
+            position = savedInstanceState.getInt(POSITION);
+            mBandName = savedInstanceState.getString(BAND_NAME);
+            timeElapsed = savedInstanceState.getDouble(TIMEELAPSED);
+        } else {
+            Bundle bundle = getArguments();
 
-        position = bundle.getInt(POSITION);
-        mBandName = bundle.getString(BAND_NAME);
-        listMusic = bundle.getParcelableArrayList(TOP_10_LIST_SONGS);
+            position = bundle.getInt(POSITION);
+            mBandName = bundle.getString(BAND_NAME);
+            listMusic = bundle.getParcelableArrayList(TOP_10_LIST_SONGS);
+        }
+    }
 
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        // save data source
+        if (listMusic != null) {
+            outState.putParcelableArrayList(TOP_10_LIST_SONGS, listMusic);
+            outState.putString(BAND_NAME, mBandName);
+            outState.putInt(POSITION, position);
+        }
+        if (mMediaPlayer != null) {
+            outState.putDouble(TIMEELAPSED, timeElapsed);
+        }
     }
 
     @Override
@@ -107,19 +132,22 @@ public class PlayerActivityFragment extends DialogFragment {
         previous = (Button) rootView.findViewById(R.id.btPrevious);
         next = (Button) rootView.findViewById(R.id.btNext);
 
+        mMediaPlayer = new MediaPlayer();
+        getMusic();
+
         //fill elements with values
-        tvArtist.setText(mBandName);
-        tvAlbum.setText(listMusic.get(position).getAlbumName());
-        Picasso.with(getActivity()).load(listMusic.get(position).getPhotoLarge()).into(ivCover);
-        tvMusic.setText(listMusic.get(position).getTrackName());
+        //tvArtist.setText(mBandName);
+        //tvAlbum.setText(listMusic.get(position).getAlbumName());
+        //Picasso.with(getActivity()).load(listMusic.get(position).getPhotoLarge()).into(ivCover);
+        //tvMusic.setText(listMusic.get(position).getTrackName());
 
         //Create MediaPlayer
-        mMediaPlayer = MediaPlayer.create(getActivity(), Uri.parse(listMusic.get(position).getPreview_url()));
+        // mMediaPlayer = MediaPlayer.create(getActivity(), Uri.parse(listMusic.get(position).getPreview_url()));
         //set duration of Music
         finalTime = mMediaPlayer.getDuration();
         mSeekBar.setMax((int) finalTime);
         //Start Music
-        startMusic();
+        //startMusic();
 
         //Config SeekBarChange
         mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -145,7 +173,7 @@ public class PlayerActivityFragment extends DialogFragment {
         mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
-                //play.setBackgroundResource(android.R.drawable.ic_media_play);
+                play.setBackgroundResource(android.R.drawable.ic_media_play);
                 //or
 
             }
@@ -170,6 +198,7 @@ public class PlayerActivityFragment extends DialogFragment {
                 if (mMediaPlayer.isPlaying()) mMediaPlayer.stop();
 
                 position = (position > 0) ? position - 1 : listMusic.size() - 1;
+                timeElapsed = 0;
                 getMusic();
             }
         });
@@ -180,6 +209,7 @@ public class PlayerActivityFragment extends DialogFragment {
 
                 if (mMediaPlayer.isPlaying()) mMediaPlayer.stop();
                 position = (position < (listMusic.size() - 1) ? position + 1 : 0);
+                timeElapsed = 0;
                 getMusic();
             }
         });
@@ -224,16 +254,33 @@ public class PlayerActivityFragment extends DialogFragment {
     }
 
     public void getMusic() {
-        //Create MediaPlayer with music
-        mMediaPlayer = MediaPlayer.create(getActivity(), Uri.parse(listMusic.get(position).getPreview_url()));
-        //set Elements
-        tvArtist.setText(mBandName);
-        tvAlbum.setText(listMusic.get(position).getAlbumName());
-        Picasso.with(getActivity()).load(listMusic.get(position).getPhotoLarge()).into(ivCover);
-        tvMusic.setText(listMusic.get(position).getTrackName());
-        //start Music
-        startMusic();
+        if (isNetworkAvailable()) {
+            //Create MediaPlayer with music
+            mMediaPlayer = MediaPlayer.create(getActivity(), Uri.parse(listMusic.get(position).getPreview_url()));
+            mMediaPlayer.seekTo((int) timeElapsed);
+            //set Elements
+            tvArtist.setText(mBandName);
+            tvAlbum.setText(listMusic.get(position).getAlbumName());
+            Picasso.with(getActivity()).load(listMusic.get(position).getPhotoLarge()).into(ivCover);
+            tvMusic.setText(listMusic.get(position).getTrackName());
+            //start Music
+            startMusic();
+        } else {
+            Context context = getActivity();
+            CharSequence text = "Sorry couldn't access the internet, please check your connection!";
+            int duration = Toast.LENGTH_SHORT;
+
+            Toast toast = Toast.makeText(context, text, duration);
+            toast.show();
+        }
     }
 
+    //Check if there is Internet Connection
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
 
 }
