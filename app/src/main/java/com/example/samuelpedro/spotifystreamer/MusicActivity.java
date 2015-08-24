@@ -18,8 +18,8 @@ public class MusicActivity extends ActionBarActivity {
         setContentView(R.layout.activity_music);
         if (savedInstanceState == null) {
             Bundle extras = new Bundle();
-            extras.putString(MusicActivityFragment.BAND_ID, getIntent().getStringExtra("id"));
-            extras.putString(MusicActivityFragment.BAND_NAME, getIntent().getStringExtra("band"));
+            extras.putString(MusicActivityFragment.BAND_ID, getIntent().getStringExtra("band_id"));
+            extras.putString(MusicActivityFragment.BAND_NAME, getIntent().getStringExtra("band_name"));
             extras.putInt("TwoPane", getIntent().getIntExtra("TwoPane", 1));
 
             MusicActivityFragment fragment = new MusicActivityFragment();

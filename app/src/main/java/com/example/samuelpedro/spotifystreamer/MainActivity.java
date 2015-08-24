@@ -61,6 +61,7 @@ public class MainActivity extends ActionBarActivity implements MainActivityFragm
 
         int myInt = (mTwoPane) ? 1 : 0;
         extra.putInt("TwoPane", myInt);
+
         //onItemSelecte3d from MainactivityFragment
         if (mTwoPane) {
             //instanciate and put values

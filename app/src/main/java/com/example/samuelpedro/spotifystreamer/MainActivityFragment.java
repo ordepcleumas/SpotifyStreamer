@@ -1,6 +1,8 @@
 package com.example.samuelpedro.spotifystreamer;
 
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -66,37 +68,43 @@ public class MainActivityFragment extends Fragment {
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_SEND) {
                     if (v.getText().length() != 0) {
-                        //Begin Task
-                        FetchArtistTask artistTask = new FetchArtistTask();
-                        artistTask.execute(v.getText().toString());
+                        if (isNetworkAvailable()) {
+                            //Begin Task
+                            FetchArtistTask artistTask = new FetchArtistTask();
+                            artistTask.execute(v.getText().toString());
+                        } else {
+                            Context context = getActivity();
+                            CharSequence text = "Sorry no internet, please check your connection!";
+                            int duration = Toast.LENGTH_SHORT;
+
+                            Toast toast = Toast.makeText(context, text, duration);
+                            toast.show();
                         }
-                    return true;
                     }
+                    return true;
+                }
                 return false;
             }
         });
 
-            //get listView
+        //get listView
         listView = (ListView) rootView.findViewById(R.id.fragment_main_listView_id);
-            //set adapter with list updated
-            listView.setAdapter(bandAdapter);
+        //set adapter with list updated
+        listView.setAdapter(bandAdapter);
 
-            //create
-            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        //create
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    Band band = bandAdapter.getItem(position);
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Band band = bandAdapter.getItem(position);
+                Bundle bundle = new Bundle();
+                bundle.putString(BAND_ID, band.getId());
+                bundle.putString(BAND_NAME, band.getName());
 
-                    Bundle bundle = new Bundle();
-
-                    bundle.putString(BAND_ID, band.getId());
-                    bundle.putString(BAND_NAME, band.getName());
-
-                    ((Callback) getActivity()).onItemSelected(bundle);
-
-                }
-            });
+                ((Callback) getActivity()).onItemSelected(bundle);
+            }
+        });
 
             return rootView;
     }
@@ -118,6 +126,14 @@ public class MainActivityFragment extends Fragment {
         if (listBand != null) {
             outState.putParcelableArrayList("bands", listBand);
         }
+    }
+
+    //Check if there is Internet Connection
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
     /**

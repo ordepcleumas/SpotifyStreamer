@@ -28,11 +28,7 @@ public class MusicAdapter extends ArrayAdapter<Music> {
 
     public void setMusic(ArrayList<Music> listMusic) {
         this.listMusic = listMusic;
-
-        Log.d(MusicAdapter.class.getName(), " 13 ");
         notifyDataSetChanged();
-
-        Log.d(MusicAdapter.class.getName(), " 14 ");
     }
 
     @Override

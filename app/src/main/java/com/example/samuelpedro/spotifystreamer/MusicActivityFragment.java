@@ -1,6 +1,9 @@
 package com.example.samuelpedro.spotifystreamer;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -11,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -49,16 +53,27 @@ public class MusicActivityFragment extends Fragment {
     public MusicActivityFragment() {
     }
 
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        listMusic = new ArrayList<>();
+        musicAdapter = new MusicAdapter(getActivity(), listMusic);
+    }
 
+
+    //check if there is Internet Connection
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        listMusic = new ArrayList<>();
-        musicAdapter = new MusicAdapter(getActivity(), listMusic);
         View rootView = inflater.inflate(R.layout.fragment_music, container, false);
-
         ListView listView = (ListView) rootView.findViewById(R.id.list_view_musics);
 
         bundleR = getArguments();
@@ -69,24 +84,32 @@ public class MusicActivityFragment extends Fragment {
             mNameBand = bundleR.getString(BAND_NAME);
             twoPane = bundleR.getInt("TwoPane");
 
-            musicAdapter = new MusicAdapter(getActivity(), listMusic);
             listView.setAdapter(musicAdapter);
 
-            if (savedInstanceState != null) {
-                listMusic = savedInstanceState.getParcelableArrayList(STATE_MUSIC);
-                musicAdapter.setMusic(listMusic);
+            if (savedInstanceState == null) {
+                if (isNetworkAvailable()) {
+                    FetchSongsTask fetchSongsTask = new FetchSongsTask();
+                    fetchSongsTask.execute(mIdBand);
+                } else {
+                    Context context = getActivity();
+                    CharSequence text = "Sorry couldn't access the internet, please check your connection!";
+                    int duration = Toast.LENGTH_SHORT;
+
+                    Toast toast = Toast.makeText(context, text, duration);
+                    toast.show();
+                }
             } else {
-                FetchSongsTask fetchSongsTask = new FetchSongsTask();
-                fetchSongsTask.execute(mIdBand);
+                listMusic = savedInstanceState.getParcelableArrayList(STATE_MUSIC);
+                musicAdapter = new MusicAdapter(getActivity(), listMusic);
+
+                listView.setAdapter(musicAdapter);
             }
         }
+
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                //Band band = bandAdapter.getItem(position);
-
-                //Intent intent = new Intent(getActivity(), PlayerActivity.class);
 
                 bundleS = new Bundle();
 
@@ -107,14 +130,10 @@ public class MusicActivityFragment extends Fragment {
 
                     startActivity(intent);
                 }
-
-                //intent.putExtras(bundleS);
-                //startActivity(intent);
             }
         });
 
-        musicAdapter.setMusic(listMusic);
-        listView.setAdapter(musicAdapter);
+
         return rootView;
     }
 
