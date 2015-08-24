@@ -1,7 +1,6 @@
 package com.example.samuelpedro.spotifystreamer;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -36,10 +35,9 @@ public class MainActivityFragment extends Fragment {
     //For bundle
     private static final String BAND_NAME = "band_name";
     private static final String BAND_ID = "band_id";
-    //For Log
-    private final String LOG_TAG = MainActivityFragment.class.getSimpleName();
     private BandsAdapter bandAdapter;
     private ArrayList<Band> listBand;
+    private ListView listView;
 
     public MainActivityFragment() {
     }
@@ -56,44 +54,30 @@ public class MainActivityFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        try {
+
             //get view
-            View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_band, container, false);
 
-            //Log.d(MainActivityFragment.class.getName(), "Saved Instance State 2");
-            //if it has no savedInstanceState or do not contain that key
-            if (savedInstanceState == null || !savedInstanceState.containsKey("bands")) {
+        //Search...
+        EditText editText = (EditText) rootView.findViewById(R.id.fragment_main_editText_id);
 
-                //Log.d(MainActivityFragment.class.getName(), "Saved Instance State 3");
-                //listBand = new ArrayList<Band>(Arrays.asList(androidFlavors));
-
-                //Search...
-                EditText editText = (EditText) rootView.findViewById(R.id.fragment_main_editText_id);
-                editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-                    @Override
-                    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                        if (actionId == EditorInfo.IME_ACTION_SEND) {
-                            if (v.getText().length() != 0) {
-                                //Begin Task
-                                FetchArtistTask artistTask = new FetchArtistTask();
-                                artistTask.execute(v.getText().toString());
-                            }
-                            return true;
+        editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_SEND) {
+                    if (v.getText().length() != 0) {
+                        //Begin Task
+                        FetchArtistTask artistTask = new FetchArtistTask();
+                        artistTask.execute(v.getText().toString());
                         }
-                        return false;
+                    return true;
                     }
-                });
-                //else get saved state
-            } else {
-
-                Log.d(MainActivityFragment.class.getName(), "Saved Instance State 4");
-                listBand = savedInstanceState.getParcelableArrayList("bands");
-
-                bandAdapter = new BandsAdapter(getActivity(), listBand);
-                bandAdapter.notifyDataSetChanged();
+                return false;
             }
+        });
+
             //get listView
-            ListView listView = (ListView) rootView.findViewById(R.id.fragment_main_listView_id);
+        listView = (ListView) rootView.findViewById(R.id.fragment_main_listView_id);
             //set adapter with list updated
             listView.setAdapter(bandAdapter);
 
@@ -103,36 +87,50 @@ public class MainActivityFragment extends Fragment {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     Band band = bandAdapter.getItem(position);
-                    Intent intent = new Intent(getActivity(), MusicActivity.class);
 
                     Bundle bundle = new Bundle();
 
                     bundle.putString(BAND_ID, band.getId());
                     bundle.putString(BAND_NAME, band.getName());
 
-                    intent.putExtras(bundle);
-                    startActivity(intent);
+                    ((Callback) getActivity()).onItemSelected(bundle);
+
                 }
             });
 
             return rootView;
+    }
 
-        } catch (Exception e) {
-            Log.e(LOG_TAG, "Error ", e);
-            return null;
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        if (savedInstanceState != null) {
+            listBand = savedInstanceState.getParcelableArrayList("bands");
+            bandAdapter = new BandsAdapter(getActivity(), listBand);
+            listView.setAdapter(bandAdapter);
         }
     }
 
-
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        Log.d(LOG_TAG, "onSaveInstanceState_1");
         super.onSaveInstanceState(outState);
-        Log.d(LOG_TAG, "onSaveInstanceState_2");
-        outState.putParcelableArrayList("bands", listBand);
-        Log.d(LOG_TAG, "onSaveInstanceState_3");
+        if (listBand != null) {
+            outState.putParcelableArrayList("bands", listBand);
+        }
     }
 
+    /**
+     * A callback interface that all activities containing this fragment must
+     * implement. This mechanism allows activities to be notified of item
+     * selections.
+     */
+    public interface Callback {
+        /**
+         * DetailFragmentCallback for when an item has been selected.
+         */
+        void onItemSelected(Bundle extra);
+    }
 
     /**
      * Created by Samuel on 23-06-2015.

@@ -5,7 +5,7 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.Fragment;
+import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class PlayerActivityFragment extends Fragment {
+public class PlayerActivityFragment extends DialogFragment {
 
     private static final String POSITION = "position";
     private static final String BAND_NAME = "band_name";
@@ -72,12 +72,17 @@ public class PlayerActivityFragment extends Fragment {
     public PlayerActivityFragment() {
     }
 
+    static PlayerActivityFragment newInstance() {
+        return new PlayerActivityFragment();
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         mMediaPlayer = new MediaPlayer();
-        Bundle bundle = getActivity().getIntent().getExtras();
+        //Bundle bundle = getActivity().getIntent().getExtras();
+        Bundle bundle = getArguments();
 
         position = bundle.getInt(POSITION);
         mBandName = bundle.getString(BAND_NAME);

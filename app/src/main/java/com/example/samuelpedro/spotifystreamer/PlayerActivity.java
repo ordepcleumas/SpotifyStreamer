@@ -1,5 +1,8 @@
 package com.example.samuelpedro.spotifystreamer;
 
+import android.annotation.TargetApi;
+import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -11,6 +14,21 @@ public class PlayerActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
+
+        if (savedInstanceState == null) {
+
+            Bundle extras = new Bundle();
+            extras.putParcelableArrayList(MusicActivityFragment.TOP_10_LIST_SONGS, getIntent().getParcelableArrayListExtra(MusicActivityFragment.TOP_10_LIST_SONGS));
+            extras.putInt(MusicActivityFragment.POSITION, getIntent().getIntExtra(MusicActivityFragment.POSITION, 1));
+            extras.putString(MusicActivityFragment.BAND_NAME, getIntent().getStringExtra(MusicActivityFragment.BAND_NAME));
+
+            PlayerActivityFragment fragment = new PlayerActivityFragment().newInstance();
+            fragment.setArguments(extras);
+
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.player_container, fragment)
+                    .commit();
+        }
     }
 
 
@@ -21,6 +39,11 @@ public class PlayerActivity extends AppCompatActivity {
         return true;
     }
 
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+    @Override
+    public Intent getParentActivityIntent() {
+        return super.getParentActivityIntent().addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

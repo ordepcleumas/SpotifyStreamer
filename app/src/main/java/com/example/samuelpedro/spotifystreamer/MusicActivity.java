@@ -1,5 +1,8 @@
 package com.example.samuelpedro.spotifystreamer;
 
+import android.annotation.TargetApi;
+import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
@@ -13,8 +16,31 @@ public class MusicActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         //getActionBar().setDisplayHomeAsUpEnabled(true);
         setContentView(R.layout.activity_music);
+        if (savedInstanceState == null) {
+            Bundle extras = new Bundle();
+            extras.putString(MusicActivityFragment.BAND_ID, getIntent().getStringExtra("id"));
+            extras.putString(MusicActivityFragment.BAND_NAME, getIntent().getStringExtra("band"));
+            extras.putInt("TwoPane", getIntent().getIntExtra("TwoPane", 1));
+
+            MusicActivityFragment fragment = new MusicActivityFragment();
+            fragment.setArguments(extras);
+
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.music_container, fragment)
+                    .commit();
+        }
     }
 
+    //To return to the previous activity that is already running
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+    @Override
+    public Intent getParentActivityIntent() {
+        return super.getParentActivityIntent().addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        //FLAG_ACTIVITY_CLEAR_TOP - If set, and the activity being launched is already running in the current task,
+        // then instead of launching a new instance of that activity, all of the other activities
+        // on top of it will be closed and this Intent will be delivered to the (now on top)
+        // old activity as a new Intent.
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

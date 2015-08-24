@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,53 +31,54 @@ import kaaes.spotify.webapi.android.models.Tracks;
 public class MusicActivityFragment extends Fragment {
 
     //For send receive bundle data
-    private static final String BAND_ID = "band_id";
-    private static final String BAND_NAME = "band_name";
-    private static final String POSITION = "position";
-    private static final String TOP_10_LIST_SONGS = "TOP_10_LIST_SONGS";
+    public static final String BAND_ID = "band_id";
+    public static final String BAND_NAME = "band_name";
+    public static final String POSITION = "position";
+    public static final String TOP_10_LIST_SONGS = "TOP_10_LIST_SONGS";
     private static final String STATE_MUSIC = "music";
     //For Log
-    private final String LOG_TAG = MusicActivityFragment.class.getSimpleName();
+    //private final String LOG_TAG = MusicActivityFragment.class.getSimpleName();
     private MusicAdapter musicAdapter;
     private ArrayList<Music> listMusic;
     private String mIdBand;
     private String mNameBand;
     private Bundle bundleR; //Receive
     private Bundle bundleS; //Send
+    private int twoPane;
 
     public MusicActivityFragment() {
     }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
 
-        listMusic = new ArrayList<>();
-        musicAdapter = new MusicAdapter(getActivity(), listMusic);
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
+        listMusic = new ArrayList<>();
+        musicAdapter = new MusicAdapter(getActivity(), listMusic);
         View rootView = inflater.inflate(R.layout.fragment_music, container, false);
+
         ListView listView = (ListView) rootView.findViewById(R.id.list_view_musics);
 
-        bundleR = getActivity().getIntent().getExtras();
+        bundleR = getArguments();
 
-        mIdBand = bundleR.getString(BAND_ID);
-        mNameBand = bundleR.getString(BAND_NAME);
+        if (bundleR != null) {
+            //get values
+            mIdBand = bundleR.getString(BAND_ID);
+            mNameBand = bundleR.getString(BAND_NAME);
+            twoPane = bundleR.getInt("TwoPane");
 
-        if (savedInstanceState == null || !savedInstanceState.containsKey(STATE_MUSIC)) {
-            Log.d("qqqqqqqqqqqqq", "aaaaaaaaaaaaaaaaaaaa");
-            FetchSongsTask fetchSongsTask = new FetchSongsTask();
-            fetchSongsTask.execute(mIdBand);
-
-        } else {
-            listMusic = savedInstanceState.getParcelableArrayList(STATE_MUSIC);
-            //musicAdapter.setMusic(listMusic);
             musicAdapter = new MusicAdapter(getActivity(), listMusic);
             listView.setAdapter(musicAdapter);
+
+            if (savedInstanceState != null) {
+                listMusic = savedInstanceState.getParcelableArrayList(STATE_MUSIC);
+                musicAdapter.setMusic(listMusic);
+            } else {
+                FetchSongsTask fetchSongsTask = new FetchSongsTask();
+                fetchSongsTask.execute(mIdBand);
+            }
         }
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -84,7 +86,7 @@ public class MusicActivityFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 //Band band = bandAdapter.getItem(position);
 
-                Intent intent = new Intent(getActivity(), PlayerActivity.class);
+                //Intent intent = new Intent(getActivity(), PlayerActivity.class);
 
                 bundleS = new Bundle();
 
@@ -92,9 +94,22 @@ public class MusicActivityFragment extends Fragment {
                 bundleS.putString(BAND_NAME, mNameBand);
                 bundleS.putParcelableArrayList(TOP_10_LIST_SONGS, listMusic);
 
-                intent.putExtras(bundleS);
+                if (twoPane == 1) {
+                    // Create the fragment and show it as a dialog.
+                    FragmentManager fm = getFragmentManager();
+                    PlayerActivityFragment dialogFragment = new PlayerActivityFragment();
+                    dialogFragment.setArguments(bundleS);
+                    dialogFragment.show(fm, "Sample Fragment");
+                } else {
+                    //Create an intent to open the PlayerActivity, passing the data with the Bundle
+                    Intent intent = new Intent(getActivity(), PlayerActivity.class);
+                    intent.putExtras(bundleS);
 
-                startActivity(intent);
+                    startActivity(intent);
+                }
+
+                //intent.putExtras(bundleS);
+                //startActivity(intent);
             }
         });
 
@@ -106,8 +121,8 @@ public class MusicActivityFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        //necessário????
-        if (!listMusic.isEmpty()) {
+
+        if (listMusic != null) {
             outState.putParcelableArrayList(STATE_MUSIC, listMusic);
         }
     }
